@@ -1,0 +1,73 @@
+service: zjuly-reko
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: zdev
+  environment:
+    TABLE_NAME: ${self:service}-${sls:stage}-blobs
+    BUCKET_NAME: ${self:service}-${sls:stage}-bbucket
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:DeleteObject
+            - s3:PutObject
+          Resource: '*'
+#            - Fn::Join:
+#                - ':'
+#                - - 'arn:aws:s3::'
+#                  - ${self:provider.environment.BUCKET_NAME}
+
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: /hello
+          method: get
+
+
+  create:
+    handler: src.create.handler
+    events:
+      - http:
+          path: /blob
+          method: post
+
+  read:
+    handler: src.read.handler
+    events:
+      - http:
+          path: /{blob_id}
+          method: get
+
+
+resources:
+  Resources:
+    BlobsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: blob_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: blob_id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+#        BucketName: ${self:provider.environment.BUCKET_NAME}
+    Bbucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.BUCKET_NAME}
+

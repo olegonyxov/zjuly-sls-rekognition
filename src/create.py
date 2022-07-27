@@ -20,7 +20,7 @@ def handler(event, context):
     # get URL
     url= s3.generate_presigned_url('put_object', Params={'Bucket': BUCKET_NAME, 'Key': blob_id},
                                   ExpiresIn=3600, HttpMethod='PUT')
-
+    #create blob_url
     blob_url= "s3://"+BUCKET_NAME+"/"+blob_id
 
     return url, CLEAR_PATH

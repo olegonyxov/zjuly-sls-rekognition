@@ -6,7 +6,6 @@ from botocore.config import Config
 
 
 BUCKET_NAME= os.environ["BUCKET_NAME"]
-CLEAR_PATH= os.environ["CLEAR_PATH"]
 s3 = boto3.client(
         's3',
         region_name='us-east-1',
@@ -22,10 +21,6 @@ def handler(event, context):
                                   ExpiresIn=3600, HttpMethod='PUT')
     #create blob_url
     blob_url= "s3://"+BUCKET_NAME+"/"+blob_id
-    clear_path = CLEAR_PATH
 
-    return {"statusCode": 400,
-            "url": url,
-            'blob_url' : "sdada",
-            "body": json.loads(url)}
+    return "lalalla"
 

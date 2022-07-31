@@ -10,8 +10,8 @@ CLEAR_PATH= os.environ["CLEAR_PATH"]
 s3 = boto3.client(
         's3',
         region_name='us-east-1',
-        # aws_access_key_id='AKIAZYKTPU7IB2XXD7VR',
-        # aws_secret_access_key='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',
+        # aws_access_key_id='xxx',
+        # aws_secret_access_key='xxx,
         config=Config(signature_version='s3v4'),)
 
 def handler(event, context):

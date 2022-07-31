@@ -1,11 +1,11 @@
-service: zjuly-reko
+service: zzjuly-reko
 
 frameworkVersion: '3'
 
 provider:
   name: aws
   runtime: python3.8
-  stage: zdev
+  stage: zzdev
   environment:
     TABLE_NAME: ${self:service}-${sls:stage}-blobs
     BUCKET_NAME: ${self:service}-${sls:stage}-bbucket

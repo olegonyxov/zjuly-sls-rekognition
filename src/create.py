@@ -22,6 +22,10 @@ def handler(event, context):
                                   ExpiresIn=3600, HttpMethod='PUT')
     #create blob_url
     blob_url= "s3://"+BUCKET_NAME+"/"+blob_id
+    clear_path = CLEAR_PATH
 
-    return url, CLEAR_PATH
+    return {"statusCode": 400,
+            "url": url,
+            'blob_url' : "sdada",
+            "body": json.loads(url)}
 

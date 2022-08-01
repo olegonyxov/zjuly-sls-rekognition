@@ -43,9 +43,9 @@ def handler(event, context):
         Item={
             "blob_id": {"S": blob_id},
             "callback_url": {"S": callback_url}})
-
+    asda = TABLE_NAME
 
     return {
         'statusCode': 200,
-        'body': json.dumps({'url': url, 'callback_url': callback_url,  'blob_id': blob_id})
+        'body': json.dumps({'url': url, 'callback_url': callback_url,  'blob_id': blob_id, 'asda': asda})
             }

@@ -19,20 +19,21 @@ provider:
             - s3:GetObject
             - s3:DeleteObject
             - s3:PutObject
-          Resource: '*'
+            - s3:ObjectCreated
+            - lambda:InvokeFunction
+          Resource: "*"
+#            Fn::Join:
+#              - ':'
+#              - - 'arn:aws:s3::'
+#                - '*'
         - Effect: Allow
           Action:
             - dynamodb:PutItem
             - dynamodb:GetItem
-          Resource: 'arn:aws:dynamodb:us-east-1:443766545919:table/zzjuly-reko-zzdev-blobs'
-        #            - Fn::Join:
-        #                - ':'
-        #                - - 'arn:aws:s3::'
-        #                  - ${self:provider.environment.BUCKET_NAME}
-#            - Fn::Join:
-#                - ':'
-#                - - 'arn:aws:s3::'
-#                  - ${self:provider.environment.BUCKET_NAME}
+          Resource:
+            !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BlobsTable}"
+
+
 
 
 functions:
@@ -57,6 +58,19 @@ functions:
       - http:
           path: /{blob_id}
           method: get
+
+  processBlob:
+    handler: src.processBlob.process
+    events:
+      - s3:
+          bucket: ${self:provider.environment.BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: uploads/
+            - suffix: .jpg
+          existing: true
+          forceDeploy: true
+
 
 
 resources:

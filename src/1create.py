@@ -1,13 +1,19 @@
-import os
 import json
+import os
+import random,string
 import boto3
-import string
-import random
+from botocore.config import Config
 
+
+BUCKET_NAME= os.environ["BUCKET_NAME"]
+TABLE_NAME= os.environ["TABLE_NAME"]
 dynamodb_client = boto3.client("dynamodb")
-TABLE_NAME = os.environ["TABLE_NAME"]
-DNS_RECORD = os.environ["DNS_RECORD"]
-
+s3 = boto3.client(
+        's3',
+        region_name='us-east-1',
+        # aws_access_key_id='xxx',
+        # aws_secret_access_key='xxx,
+        config=Config(signature_version='s3v4'),)
 
 def handler(event, context):
     # get body from event
@@ -21,27 +27,26 @@ def handler(event, context):
     # deserialization of request body
     request_body = json.loads(event_body)
 
-    # long_url validation
-    long_url = request_body.get("long_url")
-    if not long_url:
-        return {"statusCode": 400,
-                "body": json.dumps({"error": "param long_url required"})}
-
-    # generate primary key for DynamoDB table
-    url_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    # callback_url validation
+    callback_url = request_body.get("callback_url")
+    # get a new name
+    blob_id = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
+    # get URL
+    url= s3.generate_presigned_url('put_object', Params={'Bucket': BUCKET_NAME, 'Key': blob_id},
+                                  ExpiresIn=3600, HttpMethod='PUT')
+    #create blob_url
+    blob_url= "arn:aws:s3://"+BUCKET_NAME+"/"+blob_id
 
     # add a new item to the URL_TABLE
     dynamodb_client.put_item(
         TableName=TABLE_NAME,
         Item={
-            "url_id": {"S": url_id},
-            "long_url": {"S": long_url}})
+            "blob_id": {"S": blob_id},
+            "callback_url": {"S": callback_url}})
 
-    # create short_url
-    short_url = DNS_RECORD + url_id
 
-    # return short_url
+
     return {
-        "statusCode": 200,
-        "body": json.dumps({"url_id": url_id,
-                            "short_url": short_url})}
+        'statusCode': 200,
+        'body': json.dumps({'url': url, 'callback_url': callback_url,  'blob_id': blob_id})
+            }
